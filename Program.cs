@@ -3,6 +3,8 @@ using Fizzler.Systems.HtmlAgilityPack;
 using HtmlAgilityPack;
 using Fizzler;
 using System.Linq;
+using System.Text.RegularExpressions;
+using System.Text;
 
 namespace CrawlerVNEXPRESS
 {
@@ -59,10 +61,10 @@ namespace CrawlerVNEXPRESS
                     "|//div[@class=\"breadcrumb\"]/a[2]")
                     .InnerText;
 
-                Console.WriteLine("Chu de: " + cat);
-                Console.WriteLine("Tieu de: " + title);
+                Console.WriteLine("Chu de: " + TiengVietKhongDau(cat));
+                Console.WriteLine("Tieu de: " + TiengVietKhongDau(title));
                 Console.WriteLine("link: " + link);
-                Console.WriteLine("Ngay dang: " + datePost);
+                Console.WriteLine("Ngay dang: " + TiengVietKhongDau(datePost));
                 
                 //Lay noi dung
                 //Chuyển qua dùng XPath
@@ -78,6 +80,13 @@ namespace CrawlerVNEXPRESS
                 Console.WriteLine();
             }
             Console.WriteLine("Ket thuc chuong trinh");
+        }
+
+        public static string TiengVietKhongDau(string s)
+        {
+            Regex regex = new Regex("\\p{IsCombiningDiacriticalMarks}+");
+            string temp = s.Normalize(NormalizationForm.FormD);
+            return regex.Replace(temp, String.Empty).Replace('\u0111', 'd').Replace('\u0110', 'D');
         }
     }
 }
