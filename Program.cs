@@ -65,15 +65,24 @@ namespace CrawlerVNEXPRESS
                 Console.WriteLine("Tieu de: " + TiengVietKhongDau(title));
                 Console.WriteLine("link: " + link);
                 Console.WriteLine("Ngay dang: " + TiengVietKhongDau(datePost));
-                
+
                 //Lay noi dung
                 //Chuyển qua dùng XPath
+                //Giá trị class lúc thì có khoản trắng, lúc thì không
+                // dùng contain starts-with(@id,'message')
                 //var newsContents = htmlDocArticle.DocumentNode
-                //    .SelectNodes("//article[@class=\"fck_detail\"]/p[@class=\"Normal\"]|//div[@class=\"fck_detail\"]/p[@class=\"Normal\"]");
-                //foreach (var newsContent in newsContents)
-                //{
-                //    Console.WriteLine("Noi dung: " + newsContent.InnerText);
-                //}
+                //    .SelectNodes("//p[@class='description']|//article[starts-with(@class,'fck_detail')]/p[@class=\"Normal\"]|//div[@class=\"fck_detail\"]/p[@class=\"Normal\"]").ToList();
+
+                //Thử cách đơn giản hơn, lấy toàn bộ p có class description và p có class Normal
+                //Link video thì lấy div có id lead_brandsafe_video
+                var newsContents = htmlDocArticle.DocumentNode
+                   .SelectNodes("//p[@class='description']|//p[@class='Normal']|//div[@id='lead_brandsafe_video']")
+                   .ToList();
+                Console.WriteLine("Noi dung:");
+                foreach (var newsContent in newsContents)
+                {
+                    Console.WriteLine(TiengVietKhongDau(newsContent.InnerText));
+                }
 
 
 
