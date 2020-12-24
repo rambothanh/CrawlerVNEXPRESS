@@ -88,7 +88,8 @@ namespace CrawlerVNEXPRESS
 
                 Console.WriteLine();
             }
-            Console.WriteLine("Ket thuc chuong trinh");
+            Console.WriteLine("Bam Enter de ket thuc chuong trinh");
+            Console.ReadLine();
         }
 
         public static string TiengVietKhongDau(string s)
@@ -97,5 +98,6 @@ namespace CrawlerVNEXPRESS
             string temp = s.Normalize(NormalizationForm.FormD);
             return regex.Replace(temp, String.Empty).Replace('\u0111', 'd').Replace('\u0110', 'D');
         }
+        
     }
 }
