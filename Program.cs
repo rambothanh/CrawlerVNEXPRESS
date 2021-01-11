@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Text;
 using CrawlerVNEXPRESS.Models;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 
 namespace CrawlerVNEXPRESS
 {
@@ -43,7 +44,7 @@ namespace CrawlerVNEXPRESS
             //Duyệt qua các đường link vừa lấy được:
             foreach (var tagLink in tagLinkArticles)
             {
-                News news = new News{};
+                News news = new News { };
 
                 var link = tagLink.Attributes["href"].Value;
                 HtmlDocument htmlDocArticle = htmlWeb.Load(link);
@@ -112,12 +113,18 @@ namespace CrawlerVNEXPRESS
                    .SelectNodes("//p[@class='description']|//p[@class='Normal']|//div[@id='lead_brandsafe_video']")
                    .ToList();
 
+                ICollection<Content> contents = new List<Content>();
                 foreach (var newsContent in newsContents)
                 {
-                    // if(newsContent.InnerText!=null)
-                    //     news.Content.Add(newsContent.InnerText);
-                    //Console.WriteLine(TiengVietKhongDau(newsContent.InnerText));
+                    Content content = new Content { };
+                    content.Text = newsContent.InnerText;
+                    // Console.WriteLine(newsContent.InnerText);
+                    // Console.WriteLine(content.Text);
+                    if(content!=null)
+                        contents.Add(content);
                 }
+                if(contents!=null)
+                    news.Content = contents;
 
                 //Thêm một tin vào database
                 using (var context = new ClawlerContext())
@@ -131,12 +138,17 @@ namespace CrawlerVNEXPRESS
             //Test database:
             using (var context = new ClawlerContext())
             {
-              
-              Console.WriteLine(TiengVietKhongDau(context.Newss.FirstOrDefault(n => n != null).Title));  
+                //Muốn lấy Content từ News thì phải dùng Include trong using Microsoft.EntityFrameworkCore;
+                var testNews = context.Newss.Include(n =>n.Content);
+                foreach(var news1 in testNews){
+                    Console.WriteLine(TiengVietKhongDau(news1.Title));
+                    Console.WriteLine(TiengVietKhongDau(news1.Link));
+                    Console.WriteLine(TiengVietKhongDau(news1.Content.FirstOrDefault().Text));
+                }
 
             }
 
-            
+
             Console.WriteLine("Bam Enter de ket thuc chuong trinh");
             Console.ReadLine();
             #endregion

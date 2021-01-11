@@ -16,8 +16,8 @@ namespace CrawlerVNEXPRESS.Models
         // }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder){
         //UseInMemoryDatabase
-        optionsBuilder.UseInMemoryDatabase("Newss");
-        //optionsBuilder.UseSqlite("Data Source=LocalDataSQLite.db");
+        //optionsBuilder.UseInMemoryDatabase("Newss");
+        optionsBuilder.UseSqlite("Data Source=LocalDataSQLite.db");
         //optionsBuilder.UseSqlServer(@"Server=.\SQLEXPRESS;Database=TenDataBase;Trusted_Connection=True;");
     }
         public DbSet<News> Newss { get; set; }
