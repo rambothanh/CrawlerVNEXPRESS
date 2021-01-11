@@ -5,6 +5,7 @@ using Fizzler;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Text;
+using CrawlerVNEXPRESS.Models;
 
 namespace CrawlerVNEXPRESS
 {
@@ -12,6 +13,21 @@ namespace CrawlerVNEXPRESS
     {
         static void Main(string[] args)
         {
+            // Add Service
+            //private static SiteService _siteService;
+            using (var context = new ClawlerContext()) {
+
+                var news = new News()
+                {
+                     Title = "Bill"
+                };
+
+                context.Newss.Add(news);
+                context.SaveChanges();
+                Console.WriteLine(context.Newss.FirstOrDefault(n => n!=null).Title);
+            }
+            // Khu vực Crawler
+            #region Crawler
             HtmlWeb htmlWeb = new HtmlWeb();
             HtmlDocument document = htmlWeb.Load("https://vnexpress.net/");
             var tagLinkArticles = document
@@ -90,6 +106,7 @@ namespace CrawlerVNEXPRESS
             }
             Console.WriteLine("Bam Enter de ket thuc chuong trinh");
             Console.ReadLine();
+        #endregion
         }
 
         public static string TiengVietKhongDau(string s)
