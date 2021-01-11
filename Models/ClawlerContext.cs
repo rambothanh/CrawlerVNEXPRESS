@@ -18,7 +18,7 @@ namespace CrawlerVNEXPRESS.Models
         //UseInMemoryDatabase
         optionsBuilder.UseInMemoryDatabase("Newss");
         //optionsBuilder.UseSqlite("Data Source=LocalDataSQLite.db");
-        //optionsBuilder.UseSqlServer(@"Server=.\SQLEXPRESS;Database=SchoolDB;Trusted_Connection=True;");
+        //optionsBuilder.UseSqlServer(@"Server=.\SQLEXPRESS;Database=TenDataBase;Trusted_Connection=True;");
     }
         public DbSet<News> Newss { get; set; }
             

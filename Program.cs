@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Text;
 using CrawlerVNEXPRESS.Models;
+using System.Collections.Generic;
 
 namespace CrawlerVNEXPRESS
 {
@@ -15,26 +16,35 @@ namespace CrawlerVNEXPRESS
         {
             // Add Service
             //private static SiteService _siteService;
-            using (var context = new ClawlerContext()) {
+            // using (var context = new ClawlerContext()) {
+            //     //Test context
+            //     var news = new News()
+            //     {
+            //          Title = "Bill"
+            //     };
+            //     context.Newss.Add(news);
+            //     context.SaveChanges();
+            //     Console.WriteLine(context.Newss.FirstOrDefault(n => n!=null).Title);
+            // }
 
-                var news = new News()
-                {
-                     Title = "Bill"
-                };
+            //Tạo danh sách các News
+            //List<News> newss = null;
 
-                context.Newss.Add(news);
-                context.SaveChanges();
-                Console.WriteLine(context.Newss.FirstOrDefault(n => n!=null).Title);
-            }
             // Khu vực Crawler
             #region Crawler
+
+            //Lấy Các đường link tin tức trong trang chủ vnexpress:
             HtmlWeb htmlWeb = new HtmlWeb();
             HtmlDocument document = htmlWeb.Load("https://vnexpress.net/");
             var tagLinkArticles = document
                             .DocumentNode
                             .QuerySelectorAll("article.item-news>h3.title-news>a").ToList();
+
+            //Duyệt qua các đường link vừa lấy được:
             foreach (var tagLink in tagLinkArticles)
             {
+                News news = new News{};
+
                 var link = tagLink.Attributes["href"].Value;
                 HtmlDocument htmlDocArticle = htmlWeb.Load(link);
 
@@ -68,8 +78,8 @@ namespace CrawlerVNEXPRESS
                 //    cat = tagCatVideo.InnerText;
                 //}
 
-                //Thu dung XPath
-                //Lấy chủ đề của bài viết thường, bài viết góc nhìn, bài viết video
+                // Thử dùng XPath
+                // Lấy chủ đề của bài viết thường, bài viết góc nhìn, bài viết video
                 var cat = htmlDocArticle
                     .DocumentNode
                     .SelectSingleNode("//ul[@class=\"breadcrumb\"]/li/a" +
@@ -77,10 +87,17 @@ namespace CrawlerVNEXPRESS
                     "|//div[@class=\"breadcrumb\"]/a[2]")
                     .InnerText;
 
-                Console.WriteLine("Chu de: " + TiengVietKhongDau(cat));
-                Console.WriteLine("Tieu de: " + TiengVietKhongDau(title));
-                Console.WriteLine("link: " + link);
-                Console.WriteLine("Ngay dang: " + TiengVietKhongDau(datePost));
+                //Add các nội dung lấy được vào news
+                news.Link = link;
+                news.Title = title;
+                news.DatePost = datePost;
+                news.Category = cat;
+
+                // Console.WriteLine("Chu de: " + TiengVietKhongDau(cat));
+                // Console.WriteLine("Tieu de: " + TiengVietKhongDau(title));
+                // Console.WriteLine("link: " + link);
+                // Console.WriteLine("Ngay dang: " + TiengVietKhongDau(datePost));
+
 
                 //Lay noi dung
                 //Chuyển qua dùng XPath
@@ -94,19 +111,35 @@ namespace CrawlerVNEXPRESS
                 var newsContents = htmlDocArticle.DocumentNode
                    .SelectNodes("//p[@class='description']|//p[@class='Normal']|//div[@id='lead_brandsafe_video']")
                    .ToList();
-                Console.WriteLine("Noi dung:");
+
                 foreach (var newsContent in newsContents)
                 {
-                    Console.WriteLine(TiengVietKhongDau(newsContent.InnerText));
+                    // if(newsContent.InnerText!=null)
+                    //     news.Content.Add(newsContent.InnerText);
+                    //Console.WriteLine(TiengVietKhongDau(newsContent.InnerText));
                 }
 
+                //Thêm một tin vào database
+                using (var context = new ClawlerContext())
+                {
+                    context.Newss.Add(news);
+                    context.SaveChanges();
 
-
-                Console.WriteLine();
+                }
             }
+
+            //Test database:
+            using (var context = new ClawlerContext())
+            {
+              
+              Console.WriteLine(TiengVietKhongDau(context.Newss.FirstOrDefault(n => n != null).Title));  
+
+            }
+
+            
             Console.WriteLine("Bam Enter de ket thuc chuong trinh");
             Console.ReadLine();
-        #endregion
+            #endregion
         }
 
         public static string TiengVietKhongDau(string s)
@@ -115,6 +148,6 @@ namespace CrawlerVNEXPRESS
             string temp = s.Normalize(NormalizationForm.FormD);
             return regex.Replace(temp, String.Empty).Replace('\u0111', 'd').Replace('\u0110', 'D');
         }
-        
+
     }
 }
