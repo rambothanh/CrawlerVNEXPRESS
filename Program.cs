@@ -15,21 +15,6 @@ namespace CrawlerVNEXPRESS
     {
         static void Main(string[] args)
         {
-            // Add Service
-            //private static SiteService _siteService;
-            // using (var context = new ClawlerContext()) {
-            //     //Test context
-            //     var news = new News()
-            //     {
-            //          Title = "Bill"
-            //     };
-            //     context.Newss.Add(news);
-            //     context.SaveChanges();
-            //     Console.WriteLine(context.Newss.FirstOrDefault(n => n!=null).Title);
-            // }
-
-            //Tạo danh sách các News
-            //List<News> newss = null;
 
             // Khu vực Crawler
             #region Crawler
@@ -41,12 +26,17 @@ namespace CrawlerVNEXPRESS
                             .DocumentNode
                             .QuerySelectorAll("article.item-news>h3.title-news>a").ToList();
 
-            //Duyệt qua các đường link vừa lấy được:
+            //Duyệt qua các đường link vừa lấy được, lấy nội dung, kiểm tra
+            //và lưu vào database
             foreach (var tagLink in tagLinkArticles)
             {
+
                 News news = new News { };
 
                 var link = tagLink.Attributes["href"].Value;
+                if(CheckLinkInDataBase(link)){
+                    continue; // Tiêp tục vòng lập, bỏ qua link này
+                }
                 HtmlDocument htmlDocArticle = htmlWeb.Load(link);
 
                 //Lẩy thời gian đăng tin, nằm trong <span class="time"> hoặc <span class="time-now">
@@ -120,10 +110,10 @@ namespace CrawlerVNEXPRESS
                     content.Text = newsContent.InnerText;
                     // Console.WriteLine(newsContent.InnerText);
                     // Console.WriteLine(content.Text);
-                    if(content!=null)
+                    if (content != null)
                         contents.Add(content);
                 }
-                if(contents!=null)
+                if (contents != null)
                     news.Content = contents;
 
                 //Thêm một tin vào database
@@ -135,24 +125,39 @@ namespace CrawlerVNEXPRESS
                 }
             }
 
-            //Test database:
-            using (var context = new ClawlerContext())
-            {
-                //Muốn lấy Content từ News thì phải dùng Include trong using Microsoft.EntityFrameworkCore;
-                var testNews = context.Newss.Include(n =>n.Content);
-                foreach(var news1 in testNews){
-                    Console.WriteLine(TiengVietKhongDau(news1.Title));
-                    Console.WriteLine(TiengVietKhongDau(news1.Link));
-                    Console.WriteLine(TiengVietKhongDau(news1.Content.FirstOrDefault().Text));
-                }
+            //lấy nội dung từ  database để kiểm tra
+            // using (var context = new ClawlerContext())
+            // {
+            //     //Muốn lấy Content từ News thì phải dùng Include trong using Microsoft.EntityFrameworkCore;
+            //     var testNews = context.Newss.Include(n => n.Content);
+            //     foreach (var news1 in testNews)
+            //     {
+            //         Console.WriteLine(TiengVietKhongDau(news1.Title));
+            //         Console.WriteLine(TiengVietKhongDau(news1.Link));
+            //         Console.WriteLine(TiengVietKhongDau(news1.Content.FirstOrDefault().Text));
+            //     }
 
-            }
+            // }
 
 
             Console.WriteLine("Bam Enter de ket thuc chuong trinh");
             Console.ReadLine();
             #endregion
         }
+
+        // Kiểm tra link đã được lưu ở database chưa.
+        private static bool CheckLinkInDataBase(string linkPara)
+        {
+            // lấy nội dung từ  database:
+            using (var context = new ClawlerContext())
+            {
+                return context.Newss.Any(n => n.Link==linkPara);
+            }
+            
+        }
+
+
+
 
         public static string TiengVietKhongDau(string s)
         {
