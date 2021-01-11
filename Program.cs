@@ -139,7 +139,6 @@ namespace CrawlerVNEXPRESS
 
             // }
 
-
             Console.WriteLine("Bam Enter de ket thuc chuong trinh");
             Console.ReadLine();
             #endregion
@@ -155,7 +154,6 @@ namespace CrawlerVNEXPRESS
             }
             
         }
-
 
 
 
