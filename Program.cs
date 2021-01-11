@@ -34,8 +34,9 @@ namespace CrawlerVNEXPRESS
                 News news = new News { };
 
                 var link = tagLink.Attributes["href"].Value;
-                if(CheckLinkInDataBase(link)){
-                    continue; // Tiêp tục vòng lập, bỏ qua link này
+                if (CheckLinkInDataBase(link))
+                {
+                    //continue; // Tiêp tục vòng lập, bỏ qua link này
                 }
                 HtmlDocument htmlDocArticle = htmlWeb.Load(link);
 
@@ -113,8 +114,33 @@ namespace CrawlerVNEXPRESS
                     if (content != null)
                         contents.Add(content);
                 }
+
+                // Gán contents vào news
                 if (contents != null)
                     news.Content = contents;
+
+                // Lấy link image trong bài viết:
+                /// /html/body/section[4]/div/div[2]/article/figure/meta[1]
+                /// 
+                //List<HtmlNode> linkImageNodes = new List<HtmlNode>();
+                var linkImageNodes = htmlDocArticle.DocumentNode
+                   .SelectNodes("//figure/meta[@itemprop='url']");
+                   
+                if (linkImageNodes != null)
+                {
+                    //Lấy Attributes content (chứa link hình ảnh)
+                    ICollection<ImageLink> linkImages = new List<ImageLink>();
+                    foreach (var linkImageNode in linkImageNodes)
+                    {
+                        ImageLink linkImage = new ImageLink();
+                        linkImage.TextLink = linkImageNode.Attributes["content"].Value;
+                        linkImages.Add(linkImage);
+                        Console.WriteLine(linkImage.TextLink);
+                    }
+                    // Gán link ảnh vào new
+                    if (linkImages != null)
+                        news.ImageLink = linkImages;
+                }
 
                 //Thêm một tin vào database
                 using (var context = new ClawlerContext())
@@ -150,9 +176,9 @@ namespace CrawlerVNEXPRESS
             // lấy nội dung từ  database:
             using (var context = new ClawlerContext())
             {
-                return context.Newss.Any(n => n.Link==linkPara);
+                return context.Newss.Any(n => n.Link == linkPara);
             }
-            
+
         }
 
 
