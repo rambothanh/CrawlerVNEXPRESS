@@ -120,12 +120,16 @@ namespace CrawlerVNEXPRESS
                     news.Content = contents;
 
                 // Lấy link image trong bài viết:
-                /// /html/body/section[4]/div/div[2]/article/figure/meta[1]
-                /// 
-                //List<HtmlNode> linkImageNodes = new List<HtmlNode>();
+                // /html/body/section[4]/div/div[2]/article/figure/meta[1]
+                // Attributes["content"].Value
+                // 
+                // Ở phiên bản di động, đường link Image sẽ nằm ở:
+                // "//figure/div/img"  Attributes["src"].Value
+                // Sẽ xử lý phần này sau
+                
                 var linkImageNodes = htmlDocArticle.DocumentNode
                    .SelectNodes("//figure/meta[@itemprop='url']");
-                   
+                // Check if exist
                 if (linkImageNodes != null)
                 {
                     //Lấy Attributes content (chứa link hình ảnh)
@@ -135,7 +139,6 @@ namespace CrawlerVNEXPRESS
                         ImageLink linkImage = new ImageLink();
                         linkImage.TextLink = linkImageNode.Attributes["content"].Value;
                         linkImages.Add(linkImage);
-                        Console.WriteLine(linkImage.TextLink);
                     }
                     // Gán link ảnh vào new
                     if (linkImages != null)
@@ -170,7 +173,7 @@ namespace CrawlerVNEXPRESS
             #endregion
         }
 
-        // Kiểm tra link đã được lưu ở database chưa.
+        // Kiểm tra link VNexpress đã được lưu ở database chưa.
         private static bool CheckLinkInDataBase(string linkPara)
         {
             // lấy nội dung từ  database:
@@ -182,7 +185,7 @@ namespace CrawlerVNEXPRESS
         }
 
 
-
+        // Dùng để test trên console đỡ rối mắt
         public static string TiengVietKhongDau(string s)
         {
             Regex regex = new Regex("\\p{IsCombiningDiacriticalMarks}+");
