@@ -15,6 +15,7 @@ namespace CrawlerVNEXPRESS
     {
         static void Main(string[] args)
         {
+            
 
             // Khu vực Crawler
             #region Crawler
@@ -30,19 +31,31 @@ namespace CrawlerVNEXPRESS
             //và lưu vào database
             foreach (var tagLink in tagLinkArticles)
             {
-
+                
+                
                 News news = new News { };
 
                 var link = tagLink.Attributes["href"].Value;
                 if (CheckLinkInDataBase(link))
                 {
-                    //continue; // Tiêp tục vòng lập, bỏ qua link này
+                    continue; // Tiêp tục vòng lập, bỏ qua link này
                 }
                 HtmlDocument htmlDocArticle = htmlWeb.Load(link);
 
+                //Lấy htmlNode
+                var doc = htmlDocArticle.DocumentNode;
+                TakeStructure(doc,news);
                 //Lẩy thời gian đăng tin, nằm trong <span class="time"> hoặc <span class="time-now">
                 //span[class*="time"] chọn element span có class chứa chữ time (time hoặc time-now đều thoả mãn
-                var datePost = htmlDocArticle.DocumentNode.QuerySelector("span[class*=\"time\"]").InnerText;
+                // Dùng lại Xpath: //span[contains(@class, "date") or contains(@class, "time")] 
+                //Lấy node trước để tránh lỗi:
+                var datePostNote = htmlDocArticle.DocumentNode.SelectNodes("//span[contains(@class, 'date') or contains(@class, 'time')]");
+                //Check null
+                if(datePostNote!=null){
+                    news.DatePost = datePostNote.FirstOrDefault().InnerText;
+                }
+                
+              //var datePost = htmlDocArticle.DocumentNode.QuerySelector("span[class*=\"time\"]").InnerText;
 
                 //Lấy tiêu đề nằm trong <h1 class="title-detail"> hoặc <h1 class="title_gn_detail">
                 //"h1[class*=\"title\"]" chọn element h1 có class chứa chữ "title"
@@ -82,8 +95,8 @@ namespace CrawlerVNEXPRESS
                 //Add các nội dung lấy được vào news
                 news.Link = link;
                 news.Title = title;
-                news.DatePost = datePost;
-                news.Category = new Category{Text= cat};
+               
+                news.Category = new Category { Text = cat };
 
                 // Console.WriteLine("Chu de: " + TiengVietKhongDau(cat));
                 // Console.WriteLine("Tieu de: " + TiengVietKhongDau(title));
@@ -99,9 +112,11 @@ namespace CrawlerVNEXPRESS
                 //    .SelectNodes("//p[@class='description']|//article[starts-with(@class,'fck_detail')]/p[@class=\"Normal\"]|//div[@class=\"fck_detail\"]/p[@class=\"Normal\"]").ToList();
 
                 //Thử cách đơn giản hơn, lấy toàn bộ p có class description và p có class Normal
+                // Thêm cả p có class là Normal subtitle nữa
                 //Link video thì lấy div có id lead_brandsafe_video
+
                 var newsContents = htmlDocArticle.DocumentNode
-                   .SelectNodes("//p[@class='description']|//p[@class='Normal']|//div[@id='lead_brandsafe_video']")
+                   .SelectNodes("//p[@class='Normal subtitle']|//p[@class='description']|//p[@class='Normal']|//div[@id='lead_brandsafe_video']")
                    .ToList();
 
                 ICollection<Content> contents = new List<Content>();
@@ -124,7 +139,7 @@ namespace CrawlerVNEXPRESS
                 // Ở phiên bản di động, đường link Image sẽ nằm ở:
                 // "//figure/div/img"  Attributes["src"].Value
                 // Sẽ xử lý phần này sau
-                
+
                 var linkImageNodes = htmlDocArticle.DocumentNode
                    .SelectNodes("//figure/meta[@itemprop='url']");
                 // Check if exist
@@ -145,7 +160,7 @@ namespace CrawlerVNEXPRESS
 
                 //Thêm một tin vào database
                 CheckCatAndAddNews(news);
-               
+
             }
 
             //lấy nội dung từ  database để kiểm tra
@@ -167,23 +182,51 @@ namespace CrawlerVNEXPRESS
             #endregion
         }
 
+        // Lấy cấu trúc hình ảnh so với text, xử lý content và Text luôn
+        // Thực hiện lưu vào news luôn, lưu vị trí của link luôn
+        private static void TakeStructure(HtmlNode doc, News news)
+        {
+            // HtmlWeb htmlWeb = new HtmlWeb();
+            // HtmlDocument document = htmlWeb.Load("https://vnexpress.net/10-xu-huong-dinh-hinh-nganh-cong-nghe-nam-2021-4219399.html");
+            //var doc = document.DocumentNode;
+            //Đếm tất cả nội dung và hình ảnh.
+            var allNodes = doc.SelectNodes("//p[@class='Normal subtitle']|//p[@class='description']|//p[@class='Normal']|//figure/meta[@itemprop='url']");
+            var countAllNotes = allNodes.Count();
+            string structLink = "";
+            for (int i = 0; i < countAllNotes; i++)
+            {
+                var nodeIsImage = allNodes[i].Attributes["content"];
+                if(nodeIsImage!=null){
+                   structLink =structLink + $"{i+1} "; 
+                }
+            }
+            
+            Console.WriteLine(structLink);
+            //Console.WriteLine(countPDes);
+            //var structure = document.DocumentNode.SelectNodes("//p[@class='Normal'][2]//following::figure");
+            //Console.WriteLine(structure[1].InnerText);
+
+
+        }
+
         // Kiểm tra Category của News và add để đảm bảo duy nhất.
-        private static void CheckCatAndAddNews(News news){
-           using (var context = new ClawlerContext())
-            { 
+        private static void CheckCatAndAddNews(News news)
+        {
+            using (var context = new ClawlerContext())
+            {
                 // Lấy Cat từ Paran
                 var catParam = news.Category.Text;
                 // Kiểm cat giống như thế từ Database
-                var catDatabase = context.Categories.FirstOrDefault(c =>c.Text == catParam);
+                var catDatabase = context.Categories.FirstOrDefault(c => c.Text == catParam);
                 // Nếu trong Database đã có
-               if(catDatabase !=null)
-               {
-                   news.Category = catDatabase;
-               }
+                if (catDatabase != null)
+                {
+                    news.Category = catDatabase;
+                }
 
-               context.Newss.Add(news);
-               context.SaveChanges();
-            } 
+                context.Newss.Add(news);
+                context.SaveChanges();
+            }
         }
 
         // Kiểm tra link VNexpress đã được lưu ở database chưa.
@@ -194,7 +237,6 @@ namespace CrawlerVNEXPRESS
             {
                 return context.Newss.Any(n => n.Link == linkPara);
             }
-
         }
 
 
