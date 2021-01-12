@@ -15,7 +15,6 @@ namespace CrawlerVNEXPRESS
     {
         private static void Main(string[] args)
         {
-           
             //Lấy Các đường link tin tức trong trang chủ vnexpress:
             HtmlWeb htmlWeb = new HtmlWeb();
             HtmlDocument document = htmlWeb.Load("https://vnexpress.net/");
@@ -33,8 +32,11 @@ namespace CrawlerVNEXPRESS
                 {
                     continue; // Tiêp tục vòng lập, bỏ qua link này
                 }
-                
-               
+                //Bỏ qua link video
+                if (link.Contains("video"))
+                {
+                    continue; // Tiêp tục vòng lập, bỏ qua link này
+                }
                 //Load link để được đối tượng HtmlDocument
                 HtmlDocument htmlDocArticle = htmlWeb.Load(link);
                 //Lấy đối tượng htmlNode
@@ -61,7 +63,8 @@ namespace CrawlerVNEXPRESS
                 CheckCatAndAddNews(news);
    
             }
-
+            //Console.WriteLine("Bam Enter de ket thuc chuong trinh");
+            //Console.ReadLine();
             //lấy nội dung từ  database để kiểm tra
             //using (var context = new ClawlerContext())
             //{
@@ -74,11 +77,6 @@ namespace CrawlerVNEXPRESS
             //        //Console.WriteLine(TiengVietKhongDau(news1.Content.FirstOrDefault().Text));
             //    }
             //}
-
-            Console.WriteLine("Bam Enter de ket thuc chuong trinh");
-            Console.ReadLine();
-
-            
         }
 
         // Lấy cấu trúc hình ảnh so với text, xử lý content và Text luôn
