@@ -83,7 +83,7 @@ namespace CrawlerVNEXPRESS
                 news.Link = link;
                 news.Title = title;
                 news.DatePost = datePost;
-                news.Category = cat;
+                news.Category = new Category{Text= cat};
 
                 // Console.WriteLine("Chu de: " + TiengVietKhongDau(cat));
                 // Console.WriteLine("Tieu de: " + TiengVietKhongDau(title));
@@ -155,18 +155,18 @@ namespace CrawlerVNEXPRESS
             }
 
             //lấy nội dung từ  database để kiểm tra
-            // using (var context = new ClawlerContext())
-            // {
-            //     //Muốn lấy Content từ News thì phải dùng Include trong using Microsoft.EntityFrameworkCore;
-            //     var testNews = context.Newss.Include(n => n.Content);
-            //     foreach (var news1 in testNews)
-            //     {
-            //         Console.WriteLine(TiengVietKhongDau(news1.Title));
-            //         Console.WriteLine(TiengVietKhongDau(news1.Link));
-            //         Console.WriteLine(TiengVietKhongDau(news1.Content.FirstOrDefault().Text));
-            //     }
+            using (var context = new ClawlerContext())
+            {
+                //Muốn lấy Content từ News thì phải dùng Include trong using Microsoft.EntityFrameworkCore;
+                var testNews = context.Newss.Include(n => n.Category);
+                foreach (var news1 in testNews)
+                {
+                    Console.WriteLine(TiengVietKhongDau(news1.Category.Text));
+                    Console.WriteLine(TiengVietKhongDau(news1.Link));
+                    //Console.WriteLine(TiengVietKhongDau(news1.Content.FirstOrDefault().Text));
+                }
 
-            // }
+            }
 
             Console.WriteLine("Bam Enter de ket thuc chuong trinh");
             Console.ReadLine();

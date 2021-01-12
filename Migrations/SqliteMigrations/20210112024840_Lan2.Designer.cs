@@ -2,14 +2,16 @@
 using CrawlerVNEXPRESS.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace CrawlerVNEXPRESS.Migrations.SqliteMigrations
 {
     [DbContext(typeof(ClawlerContext))]
-    partial class ClawlerContextModelSnapshot : ModelSnapshot
+    [Migration("20210112024840_Lan2")]
+    partial class Lan2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -26,7 +28,7 @@ namespace CrawlerVNEXPRESS.Migrations.SqliteMigrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Category");
                 });
 
             modelBuilder.Entity("CrawlerVNEXPRESS.Models.Content", b =>
