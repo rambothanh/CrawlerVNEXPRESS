@@ -24,8 +24,13 @@ namespace CrawlerVNEXPRESS.Models
         //  optionsBuilder.Entity<News>()
         //     .HasIndex(p => new { p.FirstName, p.LastName })
         //     .IsUnique(true);
-        //optionsBuilder.Entity<Category>().
-        
+        //optionsBuilder.Entity()
+    }
+     protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Category>()
+            .HasAlternateKey(c => c.Text)
+            .HasName("AlternateKey_Category");
     }
         public DbSet<News> Newss { get; set; }
         public DbSet<Category> Categories { get; set; }

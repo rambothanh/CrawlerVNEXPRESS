@@ -109,8 +109,6 @@ namespace CrawlerVNEXPRESS
                 {
                     Content content = new Content { };
                     content.Text = newsContent.InnerText;
-                    // Console.WriteLine(newsContent.InnerText);
-                    // Console.WriteLine(content.Text);
                     if (content != null)
                         contents.Add(content);
                 }
@@ -146,31 +144,46 @@ namespace CrawlerVNEXPRESS
                 }
 
                 //Thêm một tin vào database
-                using (var context = new ClawlerContext())
-                {
-                    context.Newss.Add(news);
-                    context.SaveChanges();
-
-                }
+                CheckCatAndAddNews(news);
+               
             }
 
             //lấy nội dung từ  database để kiểm tra
-            using (var context = new ClawlerContext())
-            {
-                //Muốn lấy Content từ News thì phải dùng Include trong using Microsoft.EntityFrameworkCore;
-                var testNews = context.Newss.Include(n => n.Category);
-                foreach (var news1 in testNews)
-                {
-                    Console.WriteLine(TiengVietKhongDau(news1.Category.Text));
-                    Console.WriteLine(TiengVietKhongDau(news1.Link));
-                    //Console.WriteLine(TiengVietKhongDau(news1.Content.FirstOrDefault().Text));
-                }
+            // using (var context = new ClawlerContext())
+            // {
+            //     //Muốn lấy Content từ News thì phải dùng Include trong using Microsoft.EntityFrameworkCore;
+            //     var testNews = context.Newss.Include(n => n.Category);
+            //     foreach (var news1 in testNews)
+            //     {
+            //         Console.WriteLine(TiengVietKhongDau(news1.Category.Text));
+            //         Console.WriteLine(TiengVietKhongDau(news1.Link));
+            //         //Console.WriteLine(TiengVietKhongDau(news1.Content.FirstOrDefault().Text));
+            //     }
 
-            }
+            // }
 
             Console.WriteLine("Bam Enter de ket thuc chuong trinh");
             Console.ReadLine();
             #endregion
+        }
+
+        // Kiểm tra Category của News và add để đảm bảo duy nhất.
+        private static void CheckCatAndAddNews(News news){
+           using (var context = new ClawlerContext())
+            { 
+                // Lấy Cat từ Paran
+                var catParam = news.Category.Text;
+                // Kiểm cat giống như thế từ Database
+                var catDatabase = context.Categories.FirstOrDefault(c =>c.Text == catParam);
+                // Nếu trong Database đã có
+               if(catDatabase !=null)
+               {
+                   news.Category = catDatabase;
+               }
+
+               context.Newss.Add(news);
+               context.SaveChanges();
+            } 
         }
 
         // Kiểm tra link VNexpress đã được lưu ở database chưa.
