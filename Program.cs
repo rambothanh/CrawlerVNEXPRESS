@@ -15,7 +15,7 @@ namespace CrawlerVNEXPRESS
     {
         static void Main(string[] args)
         {
-            
+
 
             // Khu vực Crawler
             #region Crawler
@@ -31,8 +31,8 @@ namespace CrawlerVNEXPRESS
             //và lưu vào database
             foreach (var tagLink in tagLinkArticles)
             {
-                
-                
+
+
                 News news = new News { };
 
                 var link = tagLink.Attributes["href"].Value;
@@ -40,70 +40,23 @@ namespace CrawlerVNEXPRESS
                 {
                     continue; // Tiêp tục vòng lập, bỏ qua link này
                 }
+
+                //Thêm link vào news
+                news.Link = link;
+                //Load link để được đối tượng HtmlDocument
                 HtmlDocument htmlDocArticle = htmlWeb.Load(link);
 
-                //Lấy htmlNode
+                //Lấy đối tượng htmlNode
                 var doc = htmlDocArticle.DocumentNode;
-                TakeStructure(doc,news);
-                //Lẩy thời gian đăng tin, nằm trong <span class="time"> hoặc <span class="time-now">
-                //span[class*="time"] chọn element span có class chứa chữ time (time hoặc time-now đều thoả mãn
-                // Dùng lại Xpath: //span[contains(@class, "date") or contains(@class, "time")] 
-                //Lấy node trước để tránh lỗi:
-                var datePostNote = htmlDocArticle.DocumentNode.SelectNodes("//span[contains(@class, 'date') or contains(@class, 'time')]");
-                //Check null
-                if(datePostNote!=null){
-                    news.DatePost = datePostNote.FirstOrDefault().InnerText;
-                }
-                
-              //var datePost = htmlDocArticle.DocumentNode.QuerySelector("span[class*=\"time\"]").InnerText;
 
-                //Lấy tiêu đề nằm trong <h1 class="title-detail"> hoặc <h1 class="title_gn_detail">
-                //"h1[class*=\"title\"]" chọn element h1 có class chứa chữ "title"
-                var title = htmlDocArticle.DocumentNode.QuerySelector("h1[class*=\"title\"]").InnerText;
+                // Thêm ngày đăng tin vào news
+                GetDatePost(doc, news);
+                // Thêm tiêu đề tin vào news
+                GetTitle(doc, news);
+                // Thêm tiêu đề vào news
+                GetCategory(doc, news);
 
-                //Lấy chủ đề 3 kiểu bài viết khác nhau có các chủ đề nằm ở chỗ khác nhau
-                //<a data-medium="Menu-TheGioi" href="/the-gioi" title="Thế giới" data-itm-source="#vn_source=Detail&amp;vn_campaign=Header&amp;vn_medium=Menu-TheGioi&amp;vn_term=Desktop" data-itm-added="1">Thế giới</a>
-                //<a data-medium="Menu-GocNhin" href="/goc-nhin" data-itm-source="#vn_source=Detail&amp;vn_campaign=Header&amp;vn_medium=Menu-GocNhin&amp;vn_term=Desktop" data-itm-added="1">Góc nhìn</a>
-
-                //var tagCatNomal = htmlDocArticle.DocumentNode.QuerySelector("ul.breadcrumb>li>a");
-                //var tagCatGocNhin = htmlDocArticle.DocumentNode.QuerySelector("h2.title_header>a");
-                ////Lấy tag a thứ 2 thuộc div có class là breadcrumb
-                //var tagCatVideo = htmlDocArticle.DocumentNode.QuerySelector("div.breadcrumb>a:nth-child(2)");
-                //string cat;
-                //if (tagCatNomal !=null)
-                //{
-                //    cat = tagCatNomal.InnerText;
-                //}
-                //else if(tagCatGocNhin != null)
-                //{
-                //    cat = tagCatGocNhin.InnerText;
-                //}
-                //else
-                //{
-                //    cat = tagCatVideo.InnerText;
-                //}
-
-                // Thử dùng XPath
-                // Lấy chủ đề của bài viết thường, bài viết góc nhìn, bài viết video
-                var cat = htmlDocArticle
-                    .DocumentNode
-                    .SelectSingleNode("//ul[@class=\"breadcrumb\"]/li/a" +
-                    "|//h2[@class=\"title_header\"]/a" +
-                    "|//div[@class=\"breadcrumb\"]/a[2]")
-                    .InnerText;
-
-                //Add các nội dung lấy được vào news
-                news.Link = link;
-                news.Title = title;
-               
-                news.Category = new Category { Text = cat };
-
-                // Console.WriteLine("Chu de: " + TiengVietKhongDau(cat));
-                // Console.WriteLine("Tieu de: " + TiengVietKhongDau(title));
-                // Console.WriteLine("link: " + link);
-                // Console.WriteLine("Ngay dang: " + TiengVietKhongDau(datePost));
-
-
+                TakeStructure(doc, news);
                 //Lay noi dung
                 //Chuyển qua dùng XPath
                 //Giá trị class lúc thì có khoản trắng, lúc thì không
@@ -196,17 +149,62 @@ namespace CrawlerVNEXPRESS
             for (int i = 0; i < countAllNotes; i++)
             {
                 var nodeIsImage = allNodes[i].Attributes["content"];
-                if(nodeIsImage!=null){
-                   structLink =structLink + $"{i+1} "; 
+                if (nodeIsImage != null)
+                {
+                    structLink = structLink + $"{i + 1} ";
                 }
             }
-            
+
             Console.WriteLine(structLink);
             //Console.WriteLine(countPDes);
             //var structure = document.DocumentNode.SelectNodes("//p[@class='Normal'][2]//following::figure");
             //Console.WriteLine(structure[1].InnerText);
 
 
+        }
+
+        // Lấy Cat
+        private static void GetCategory(HtmlNode doc, News news)
+        {
+
+            // Lấy chủ đề của bài viết thường, bài viết góc nhìn, bài viết video
+            // Lấy catNodes
+            var catNodes = doc.SelectSingleNode("//ul[@class=\"breadcrumb\"]/li/a" +
+                "|//h2[@class=\"title_header\"]/a" +
+                "|//div[@class=\"breadcrumb\"]/a[2]");
+            if (catNodes != null)
+            {
+                news.Category = new Category { Text = catNodes.InnerText };
+            }
+        }
+
+
+        // lấy tiêu đề:
+        private static void GetTitle(HtmlNode doc, News news)
+        {
+            //Lấy tiêu đề nằm trong <h1 class="title-detail"> hoặc <h1 class="title_gn_detail">
+            //"h1[class*=\"title\"]" chọn element h1 có class chứa chữ "title"
+            var titleNodes = doc.QuerySelector("h1[class*=\"title\"]");
+            if (titleNodes != null)
+            {
+                news.Title = titleNodes.InnerText;
+            }
+
+        }
+
+        // Lấy date tin tức
+        private static void GetDatePost(HtmlNode doc, News news)
+        {
+            //Lẩy thời gian đăng tin, nằm trong <span class="time"> hoặc <span class="time-now">
+            //span[class*="time"] chọn element span có class chứa chữ time (time hoặc time-now đều thoả mãn
+            // Dùng lại Xpath: //span[contains(@class, "date") or contains(@class, "time")] 
+            //Lấy node trước để tránh lỗi:
+            var datePostNote = doc.SelectNodes("//span[contains(@class, 'date') or contains(@class, 'time')]");
+            //Check null
+            if (datePostNote != null)
+            {
+                news.DatePost = datePostNote.FirstOrDefault().InnerText;
+            }
         }
 
         // Kiểm tra Category của News và add để đảm bảo duy nhất.
