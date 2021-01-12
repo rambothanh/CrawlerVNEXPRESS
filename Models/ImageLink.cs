@@ -10,6 +10,9 @@ namespace CrawlerVNEXPRESS.Models
         [ForeignKey("News")]
         public long NewsRefId  {get;set;}
         public News News  {get;set;}
+
+        public long Location { get; set; }
+        
         
     }
 }

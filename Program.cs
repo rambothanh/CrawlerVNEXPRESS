@@ -31,24 +31,18 @@ namespace CrawlerVNEXPRESS
             //và lưu vào database
             foreach (var tagLink in tagLinkArticles)
             {
-
-
                 News news = new News { };
-
                 var link = tagLink.Attributes["href"].Value;
                 if (CheckLinkInDataBase(link))
                 {
                     continue; // Tiêp tục vòng lập, bỏ qua link này
                 }
-
                 //Thêm link vào news
                 news.Link = link;
                 //Load link để được đối tượng HtmlDocument
                 HtmlDocument htmlDocArticle = htmlWeb.Load(link);
-
                 //Lấy đối tượng htmlNode
                 var doc = htmlDocArticle.DocumentNode;
-
                 // Thêm ngày đăng tin vào news
                 GetDatePost(doc, news);
                 // Thêm tiêu đề tin vào news
@@ -56,7 +50,7 @@ namespace CrawlerVNEXPRESS
                 // Thêm tiêu đề vào news
                 GetCategory(doc, news);
 
-                TakeStructure(doc, news);
+                TakeImageAndStructure(doc, news);
                 //Lay noi dung
                 //Chuyển qua dùng XPath
                 //Giá trị class lúc thì có khoản trắng, lúc thì không
@@ -137,7 +131,7 @@ namespace CrawlerVNEXPRESS
 
         // Lấy cấu trúc hình ảnh so với text, xử lý content và Text luôn
         // Thực hiện lưu vào news luôn, lưu vị trí của link luôn
-        private static void TakeStructure(HtmlNode doc, News news)
+        private static void TakeImageAndStructure(HtmlNode doc, News news)
         {
             // HtmlWeb htmlWeb = new HtmlWeb();
             // HtmlDocument document = htmlWeb.Load("https://vnexpress.net/10-xu-huong-dinh-hinh-nganh-cong-nghe-nam-2021-4219399.html");
@@ -156,11 +150,6 @@ namespace CrawlerVNEXPRESS
             }
 
             Console.WriteLine(structLink);
-            //Console.WriteLine(countPDes);
-            //var structure = document.DocumentNode.SelectNodes("//p[@class='Normal'][2]//following::figure");
-            //Console.WriteLine(structure[1].InnerText);
-
-
         }
 
         // Lấy Cat
