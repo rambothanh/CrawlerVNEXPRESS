@@ -2,14 +2,16 @@
 using CrawlerVNEXPRESS.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace CrawlerVNEXPRESS.Migrations.SqliteMigrations
 {
     [DbContext(typeof(ClawlerContext))]
-    partial class ClawlerContextModelSnapshot : ModelSnapshot
+    [Migration("20210115030137_lan7")]
+    partial class lan7
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

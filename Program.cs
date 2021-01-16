@@ -63,20 +63,20 @@ namespace CrawlerVNEXPRESS
                 CheckCatAndAddNews(news);
    
             }
-            //Console.WriteLine("Bam Enter de ket thuc chuong trinh");
-            //Console.ReadLine();
+            Console.WriteLine("Bam Enter de ket thuc chuong trinh");
+            Console.ReadLine();
             //lấy nội dung từ  database để kiểm tra
-            //using (var context = new ClawlerContext())
-            //{
-            //    //Muốn lấy Content từ News thì phải dùng Include trong using Microsoft.EntityFrameworkCore;
-            //    var testNews = context.Newss.Include(n => n.Category);
-            //    foreach (var news1 in testNews)
-            //    {
-            //        Console.WriteLine(TiengVietKhongDau(news1.Category.Text));
-            //        Console.WriteLine(TiengVietKhongDau(news1.Link));
-            //        //Console.WriteLine(TiengVietKhongDau(news1.Content.FirstOrDefault().Text));
-            //    }
-            //}
+            using (var context = new ClawlerContext())
+            {
+               //Muốn lấy Content từ News thì phải dùng Include trong using Microsoft.EntityFrameworkCore;
+               var testNews = context.Newss.Include(n => n.Content);
+               foreach (var news1 in testNews)
+               {
+                   //Console.WriteLine(TiengVietKhongDau(news1.Category.Text));
+                   Console.WriteLine(TiengVietKhongDau(news1.Link));
+                   Console.WriteLine(TiengVietKhongDau(news1.Content.FirstOrDefault().Text));
+               }
+            }
         }
 
         // Lấy cấu trúc hình ảnh so với text, xử lý content và Text luôn
