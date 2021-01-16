@@ -87,8 +87,9 @@ namespace CrawlerVNEXPRESS
             //var newsContents = htmlDocArticle.DocumentNode
             //   .SelectNodes("//p[@class='Normal subtitle']|//p[@class='description']|//p[@class='Normal']|//div[@id='lead_brandsafe_video']")
             //   .ToList();
-            //Đếm tất cả nội dung và hình ảnh.
+            
             var allNodes = doc.SelectNodes("//p[contains(@class,'Normal') or contains(@class,'description')]|//figure/meta[@itemprop='url']");
+            //Đếm tất cả nội dung và hình ảnh.
             var countAllNotes = allNodes.Count();
             ICollection<ImageLink> linkImages = new List<ImageLink>();
             ICollection<Content> contents = new List<Content>();
