@@ -27,6 +27,13 @@ namespace CrawlerVNEXPRESS
             {
                 News news = new News { };
                 var link = tagLink.Attributes["href"].Value;
+
+                //Link podcast để test
+                //var link = "https://vnexpress.net/le-nham-chuc-khac-thuong-cua-tong-thong-my-4222161.html";
+
+                //Link slide để test
+                //var link = "https://vnexpress.net/tuan-tra-trong-dem-am-2-do-c-4220047.html";
+
                 //Bỏ qua link đã lấy    
                 if (CheckLinkInDataBase(link))
                 {
@@ -37,6 +44,7 @@ namespace CrawlerVNEXPRESS
                 {
                     continue; // Tiêp tục vòng lập, bỏ qua link này
                 }
+
                 //Load link để được đối tượng HtmlDocument
                 HtmlDocument htmlDocArticle = htmlWeb.Load(link);
                 //Lấy đối tượng htmlNode
@@ -61,8 +69,11 @@ namespace CrawlerVNEXPRESS
                 AddImageAndContent(doc, ref news);
                 // Kiểm tra Cat và add news vào database
                 CheckCatAndAddNews(news);
-   
+
+
+                Console.WriteLine(CheckType(doc));
             }
+            
             Console.WriteLine("Bam Enter de ket thuc chuong trinh");
             Console.ReadLine();
             // //lấy nội dung từ  database để kiểm tra
@@ -77,6 +88,31 @@ namespace CrawlerVNEXPRESS
             //        Console.WriteLine(TiengVietKhongDau(news1.Content.FirstOrDefault().Text));
             //    }
             // }
+        }
+
+
+        //Check type of news
+        private static string CheckType(HtmlNode doc)
+        {
+            //Nếu tồn tại //i[contains(@class, ic-live)] là bài viết trực tiếp
+            var linkLive = doc.SelectNodes("//i[contains(@class, ic-live)]");
+            if (linkLive != null)
+                return "live";
+
+            //Nếu tồn tại div[contains(@class,"item_slide_show")], là bài viết slide_show
+            var linkSlideShow = doc.SelectNodes("//div[contains(@class,'item_slide_show')]");
+            if (linkSlideShow != null)
+                return "slide_show";
+
+            var catNodes = doc.SelectSingleNode(
+                "//ul[@class=\"breadcrumb\"]/li/a" +
+                "|//h2[@class=\"title_header\"]/a" +
+                "|//div[@class=\"breadcrumb\"]/a[2]");
+            if (catNodes?.InnerText == "Podcast")
+                return "podcast";
+
+            return "normal";
+
         }
 
         // Lấy cấu trúc hình ảnh so với text, xử lý content và Text luôn
@@ -123,7 +159,8 @@ namespace CrawlerVNEXPRESS
         {
             // Lấy chủ đề của bài viết thường, bài viết góc nhìn, bài viết video
             // Lấy catNodes
-            var catNodes = doc.SelectSingleNode("//ul[@class=\"breadcrumb\"]/li/a" +
+            var catNodes = doc.SelectSingleNode(
+                "//ul[@class=\"breadcrumb\"]/li/a" +
                 "|//h2[@class=\"title_header\"]/a" +
                 "|//div[@class=\"breadcrumb\"]/a[2]");
             if (catNodes != null)
