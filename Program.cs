@@ -50,9 +50,10 @@ namespace CrawlerVNEXPRESS
                 //Lấy đối tượng htmlNode
                 var doc = htmlDocArticle.DocumentNode;
 
-                //Bỏ qua link trực tiếp: //i[contains(@class, ic-live)]
-                var linkLive = doc.SelectNodes("//i[contains(@class, ic-live)]");
-                if(linkLive != null)
+                //Bỏ qua link trực tiếp, và link podcast
+                //Check type of news return: live, slide_show, podcast, normal
+                var type = CheckType(doc);
+                if(type == "live" || type == "podcast")
                 {
                     continue; // Tiêp tục vòng lập, bỏ qua link này
                 }
@@ -71,27 +72,27 @@ namespace CrawlerVNEXPRESS
                 CheckCatAndAddNews(news);
 
 
-                Console.WriteLine(CheckType(doc));
+                
             }
             
             Console.WriteLine("Bam Enter de ket thuc chuong trinh");
             Console.ReadLine();
-            // //lấy nội dung từ  database để kiểm tra
-            // using (var context = new ClawlerContext())
-            // {
-            //    //Muốn lấy Content từ News thì phải dùng Include trong using Microsoft.EntityFrameworkCore;
-            //    var testNews = context.Newss.Include(n => n.Content);
-            //    foreach (var news1 in testNews)
-            //    {
-            //        //Console.WriteLine(TiengVietKhongDau(news1.Category.Text));
-            //        Console.WriteLine(TiengVietKhongDau(news1.Link));
-            //        Console.WriteLine(TiengVietKhongDau(news1.Content.FirstOrDefault().Text));
-            //    }
-            // }
+            //lấy nội dung từ  database để kiểm tra
+            using (var context = new ClawlerContext())
+            {
+                //Muốn lấy Content từ News thì phải dùng Include trong using Microsoft.EntityFrameworkCore;
+                var testNews = context.Newss.Include(n => n.Content);
+                foreach (var news1 in testNews)
+                {
+                    //Console.WriteLine(TiengVietKhongDau(news1.Category.Text));
+                    Console.WriteLine(TiengVietKhongDau(news1.Link));
+                    Console.WriteLine(TiengVietKhongDau(news1.Content.FirstOrDefault().Text));
+                }
+            }
         }
 
 
-        //Check type of news
+        //Check type of news return live slide_show podcast normal
         private static string CheckType(HtmlNode doc)
         {
             //Nếu tồn tại //i[contains(@class, ic-live)] là bài viết trực tiếp
@@ -115,9 +116,19 @@ namespace CrawlerVNEXPRESS
 
         }
 
+        private static void AddImageAndContent(HtmlNode doc, ref News news)
+        {
+            string type = CheckType(doc);
+            if (type == "normal")
+                AddImageAndContentNormal(doc, ref news);
+            if (type == "slide_show")
+                AddImageAndContentSlideShow(doc, ref news);
+        }
+
         // Lấy cấu trúc hình ảnh so với text, xử lý content và Text luôn
         // Thực hiện lưu vào news luôn, lưu vị trí của link luôn
-        private static void AddImageAndContent(HtmlNode doc, ref News news)
+        // Normal news:
+        private static void AddImageAndContentNormal(HtmlNode doc, ref News news)
         {
             //Luu y: duong link co video (chua xu ly)
             //var newsContents = htmlDocArticle.DocumentNode
@@ -141,6 +152,44 @@ namespace CrawlerVNEXPRESS
                     //Lấy link và thêm vào danh sách linkImages
 
                     linkImages.Add(new ImageLink { Location = i + 1, TextLink = allNodes[i].Attributes["content"].Value });
+                }
+                //Lấy nội dung (bao gồm description và subtitle)
+                //Có thời gian sẽ tách ra
+                if (NameNode == "p" && !string.IsNullOrEmpty(NameNode))
+                {
+                    contents.Add(new Content { Location = i + 1, Text = allNodes[i].InnerText });
+                }
+            }
+
+            news.ImageLink = linkImages;
+            news.Content = contents;
+        }
+
+        // Get slide_show news:
+        private static void AddImageAndContentSlideShow(HtmlNode doc, ref News news)
+        {
+            //Tìm đầy đủ content (không trùng lắp): //div[contains(@class,'item_slide_show')]/div[not(contains(@style,'display: none'))]/p[contains(@class,'Normal')]
+            //Ngắn gọn hơn: //div[not(contains(@style,'display: none'))]/p[contains(@class,'Normal')]
+            //điều chỉnh để tìm được description chuẩn hơn
+            //Image: nằm trong thẻ //picture/img attribute data-src 
+            var allNodes = doc.SelectNodes("//div[contains(@class,'width-detail-photo')]/p[contains(@class,'description')]|" +
+                "//div[not(contains(@style,'display: none'))]/p[contains(@class,'Normal')]|" +
+                "//picture/img");
+            //Đếm tất cả nội dung và hình ảnh.
+            var countAllNotes = allNodes.Count();
+            ICollection<ImageLink> linkImages = new List<ImageLink>();
+            ICollection<Content> contents = new List<Content>();
+            for (int i = 0; i < countAllNotes; i++)
+            {
+                //Lấy Image
+                //nếu tồn tại Attribute là data-src thì nó là image
+                //var nodeIsImage = allNodes[i].Attributes["data-src"];
+                var NameNode = allNodes[i].Name;
+
+                if (NameNode == "img" && !string.IsNullOrEmpty(NameNode))
+                {
+                    //Lấy link và thêm vào danh sách linkImages
+                    linkImages.Add(new ImageLink { Location = i + 1, TextLink = allNodes[i].Attributes["data-src"].Value });
                 }
                 //Lấy nội dung (bao gồm description và subtitle)
                 //Có thời gian sẽ tách ra
