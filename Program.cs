@@ -53,7 +53,7 @@ namespace CrawlerVNEXPRESS
                 //Bỏ qua link trực tiếp, và link podcast
                 //Check type of news return: live, slide_show, podcast, normal
                 var type = CheckType(doc);
-                if(type == "live" || type == "podcast")
+                if (type == "live" || type == "podcast")
                 {
                     continue; // Tiêp tục vòng lập, bỏ qua link này
                 }
@@ -72,21 +72,26 @@ namespace CrawlerVNEXPRESS
                 CheckCatAndAddNews(news);
 
 
-                
+
             }
-            
+
             Console.WriteLine("Bam Enter de ket thuc chuong trinh");
             Console.ReadLine();
             //lấy nội dung từ  database để kiểm tra
             using (var context = new ClawlerContext())
             {
                 //Muốn lấy Content từ News thì phải dùng Include trong using Microsoft.EntityFrameworkCore;
-                var testNews = context.Newss.Include(n => n.Content);
+                var testNews = context.Newss.Include(n => n.ImageLink);
                 foreach (var news1 in testNews)
                 {
                     //Console.WriteLine(TiengVietKhongDau(news1.Category.Text));
                     Console.WriteLine(TiengVietKhongDau(news1.Link));
-                    Console.WriteLine(TiengVietKhongDau(news1.Content.FirstOrDefault().Text));
+                    foreach(var imageLink in news1.ImageLink){
+                       Console.WriteLine(TiengVietKhongDau(imageLink?.Captain ??""));
+                       Console.WriteLine(imageLink?.TextLink);
+                    }
+                    
+                    // Console.WriteLine(TiengVietKhongDau(news1.ImageLink?.FirstOrDefault()?.TextLink));
                 }
             }
         }
@@ -130,12 +135,10 @@ namespace CrawlerVNEXPRESS
         // Normal news:
         private static void AddImageAndContentNormal(HtmlNode doc, ref News news)
         {
-            //Luu y: duong link co video (chua xu ly)
-            //var newsContents = htmlDocArticle.DocumentNode
-            //   .SelectNodes("//p[@class='Normal subtitle']|//p[@class='description']|//p[@class='Normal']|//div[@id='lead_brandsafe_video']")
-            //   .ToList();
-            
-            var allNodes = doc.SelectNodes("//p[contains(@class,'Normal') or contains(@class,'description')]|//figure/meta[@itemprop='url']");
+
+            ///meta[@itemprop='url']"
+            var allNodes = doc.SelectNodes("//p[contains(@class,'Normal') or contains(@class,'description')]|//figure");
+            var node = allNodes[0];
             //Đếm tất cả nội dung và hình ảnh.
             var countAllNotes = allNodes.Count();
             ICollection<ImageLink> linkImages = new List<ImageLink>();
@@ -143,15 +146,24 @@ namespace CrawlerVNEXPRESS
             for (int i = 0; i < countAllNotes; i++)
             {
                 //Lấy Image
-                //nếu tồn tại Attribute là content thì nó là image
-                //var nodeIsImage = allNodes[i].Attributes["content"];
+                //nếu là Image thì thẻ có tên là figure
                 var NameNode = allNodes[i].Name;
-
-                if (NameNode == "meta" && !string.IsNullOrEmpty(NameNode))
+                if (NameNode == "figure" && !string.IsNullOrEmpty(NameNode))
                 {
+                    //Lấy caption của image
+                    //figure/figcaption/p
+                    //Nhở bỏ hai dấu // (để tìm kiếm con trực tiếp)
+                    var captain = allNodes[i].SelectNodes("figcaption/p")?.FirstOrDefault().InnerText;
                     //Lấy link và thêm vào danh sách linkImages
-
-                    linkImages.Add(new ImageLink { Location = i + 1, TextLink = allNodes[i].Attributes["content"].Value });
+                    linkImages.Add(new ImageLink
+                    {
+                        Captain = captain,
+                        Location = i + 1,
+                        //Nhở bỏ hai dấu // (để tìm kiếm con trực tiếp)
+                        TextLink = allNodes[i].SelectNodes("meta[@itemprop='url']")
+                            ?.FirstOrDefault()
+                            .Attributes["content"].Value
+                    });
                 }
                 //Lấy nội dung (bao gồm description và subtitle)
                 //Có thời gian sẽ tách ra
