@@ -31,11 +31,13 @@ namespace CrawlerVNEXPRESS
                 //Link podcast để test
                 //var link = "https://vnexpress.net/le-nham-chuc-khac-thuong-cua-tong-thong-my-4222161.html";
 
+
                 //Link normal để test
                 var link ="https://vnexpress.net/thiet-hai-940-ty-dong-tai-sadeco-da-duoc-khac-phuc-4220098.html";
 
                 //Link slide để test
                 //var link = "https://vnexpress.net/tuan-tra-trong-dem-am-2-do-c-4220047.html";
+                //https://vnexpress.net/nghe-si-tong-duyet-gala-ngoi-sao-cua-nam-4223351.html
 
                 //Bỏ qua link đã lấy    
                 if (CheckLinkInDataBase(link))
