@@ -1,6 +1,7 @@
 # CrawlerVNEXPRESS
 ## Feature
-Tool crawl dữ liệu từ trang tin tức vnexpress.net. Bóc tách các dữ liệu từ HTML. Lấy link của các tin tức mới nhất, từ các Link này tiếp tục vào từng link để lấy Chủ đề, Tiêu đề, Link, nội dung tin (bao gồm cấu trúc nội dung) sau đó lưu về database.
+Tool to crawl data from news site vnexpress.net. Extracting data from HTML. Get the link of the latest news, from these Links continue to each link to get the Subject, Title, Link, the content of the news (including the content structure) then save to the database.
+
 ## Technology
 #### .Net 5
 #### HtmlAgilityPack, Xpath, Css Selector
