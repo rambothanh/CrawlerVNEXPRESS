@@ -5,7 +5,7 @@ Tool to crawl data from news site vnexpress.net. Extracting data from HTML. Get 
 The data will be served by the API app ([TodoAPI](https://github.com/rambothanh/TodoApi)). And the client app ([VNexpressClient](https://github.com/rambothanh/VnexpressClient)) will call the API to get the data and show it to the end user
 
 ## Technology
-#### .Net 5
+#### C#, .Net 5
 #### HtmlAgilityPack, Xpath, Css Selector
 #### EntityFrameworkCore
 ## Console output
