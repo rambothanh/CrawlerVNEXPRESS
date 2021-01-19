@@ -83,10 +83,10 @@ namespace CrawlerVNEXPRESS
                 foreach (var news1 in testNews)
                 {
                     //Console.WriteLine(TiengVietKhongDau(news1.Category.Text));
-                    Console.WriteLine(TiengVietKhongDau(news1.Link));
+                    Console.WriteLine(news1.Link);
                     foreach(var imageLink in news1.ImageLink){
-                       //Console.WriteLine(TiengVietKhongDau(imageLink?.Captain ??""));
                        Console.WriteLine(imageLink?.TextLink);
+                       Console.WriteLine(TiengVietKhongDau(imageLink?.Captain ??""));
                     }
                     
                     
