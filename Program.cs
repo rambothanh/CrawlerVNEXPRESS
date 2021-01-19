@@ -79,22 +79,22 @@ namespace CrawlerVNEXPRESS
             }
 
             //lấy nội dung từ  database để kiểm tra
-            // using (var context = new ClawlerContext())
-            // {
-            //     //Muốn lấy Content từ News thì phải dùng Include trong using Microsoft.EntityFrameworkCore;
-            //     var testNews = context.Newss.Include(n => n.ImageLink);
-            //     foreach (var news1 in testNews)
-            //     {
-            //         //Console.WriteLine(TiengVietKhongDau(news1.Category.Text));
-            //         Console.WriteLine(news1.Link);
-            //         foreach(var imageLink in news1.ImageLink){
-            //            Console.WriteLine(imageLink?.TextLink);
-            //            Console.WriteLine(TiengVietKhongDau(imageLink?.Captain ??""));
-            //         }
+            using (var context = new ClawlerContext())
+            {
+                //Muốn lấy Content từ News thì phải dùng Include trong using Microsoft.EntityFrameworkCore;
+                var testNews = context.Newss.Include(n => n.ImageLink);
+                foreach (var news1 in testNews)
+                {
+                    //Console.WriteLine(TiengVietKhongDau(news1.Category.Text));
+                    Console.WriteLine(news1.Link);
+                    foreach(var imageLink in news1.ImageLink){
+                       Console.WriteLine(imageLink?.TextLink);
+                       Console.WriteLine(TiengVietKhongDau(imageLink?.Captain ??""));
+                    }
                     
                     
-            //     }
-            // }
+                }
+            }
         }
 
 
@@ -147,7 +147,7 @@ namespace CrawlerVNEXPRESS
             for (int i = 0; i < countAllNotes; i++)
             {
                 //Hiện node hình ảnh để test trên linux:
-                Console.WriteLine(TiengVietKhongDau(allNodes[i].InnerHtml) );
+                //Console.WriteLine(TiengVietKhongDau(allNodes[i].InnerHtml) );
 
                 //Lấy Image
                 //nếu là Image thì thẻ có tên là figure
@@ -158,16 +158,28 @@ namespace CrawlerVNEXPRESS
                     //figure/figcaption/p
                     //Nhở bỏ hai dấu // (để tìm kiếm con trực tiếp)
                     var captain = allNodes[i].SelectNodes("figcaption/p")?.FirstOrDefault().InnerText;
-                    //Lấy link và thêm vào danh sách linkImages
+                    // //Lấy link và thêm vào danh sách linkImages, trên windown:
+                    // linkImages.Add(new ImageLink
+                    // {
+                    //     Captain = captain,
+                    //     Location = i + 1,
+                    //     //Nhở bỏ hai dấu // (để tìm kiếm con trực tiếp)
+                    //     TextLink = allNodes[i].SelectNodes("meta[@itemprop='url']")
+                    //         ?.FirstOrDefault()
+                    //         .Attributes["content"].Value
+                    // });
+
+                    //Lấy link và thêm vào danh sách linkImages, trên linux:
                     linkImages.Add(new ImageLink
                     {
                         Captain = captain,
                         Location = i + 1,
                         //Nhở bỏ hai dấu // (để tìm kiếm con trực tiếp)
-                        TextLink = allNodes[i].SelectNodes("meta[@itemprop='url']")
+                        TextLink = allNodes[i].SelectNodes("img")
                             ?.FirstOrDefault()
-                            .Attributes["content"].Value
+                            .Attributes["src"].Value
                     });
+
                 }
                 //Lấy nội dung (bao gồm description và subtitle)
                 //Có thời gian sẽ tách ra
