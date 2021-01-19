@@ -75,23 +75,23 @@ namespace CrawlerVNEXPRESS
 
             }
 
-            // //lấy nội dung từ  database để kiểm tra
-            // using (var context = new ClawlerContext())
-            // {
-            //     //Muốn lấy Content từ News thì phải dùng Include trong using Microsoft.EntityFrameworkCore;
-            //     var testNews = context.Newss.Include(n => n.ImageLink);
-            //     foreach (var news1 in testNews)
-            //     {
-            //         //Console.WriteLine(TiengVietKhongDau(news1.Category.Text));
-            //         Console.WriteLine(TiengVietKhongDau(news1.Link));
-            //         foreach(var imageLink in news1.ImageLink){
-            //            Console.WriteLine(TiengVietKhongDau(imageLink?.Captain ??""));
-            //            Console.WriteLine(imageLink?.TextLink);
-            //         }
+            //lấy nội dung từ  database để kiểm tra
+            using (var context = new ClawlerContext())
+            {
+                //Muốn lấy Content từ News thì phải dùng Include trong using Microsoft.EntityFrameworkCore;
+                var testNews = context.Newss.Include(n => n.ImageLink);
+                foreach (var news1 in testNews)
+                {
+                    //Console.WriteLine(TiengVietKhongDau(news1.Category.Text));
+                    Console.WriteLine(TiengVietKhongDau(news1.Link));
+                    foreach(var imageLink in news1.ImageLink){
+                       //Console.WriteLine(TiengVietKhongDau(imageLink?.Captain ??""));
+                       Console.WriteLine(imageLink?.TextLink);
+                    }
                     
-            //         // Console.WriteLine(TiengVietKhongDau(news1.ImageLink?.FirstOrDefault()?.TextLink));
-            //     }
-            // }
+                    
+                }
+            }
         }
 
 
