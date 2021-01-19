@@ -175,7 +175,7 @@ namespace CrawlerVNEXPRESS
                         Captain = captain,
                         Location = i + 1,
                         //Nhở bỏ hai dấu // (để tìm kiếm con trực tiếp)
-                        TextLink = allNodes[i].SelectNodes("img")
+                        TextLink = allNodes[i].SelectNodes("div/img")
                             ?.FirstOrDefault()
                             .Attributes["src"].Value
                     });
