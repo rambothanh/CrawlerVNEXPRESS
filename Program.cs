@@ -26,10 +26,13 @@ namespace CrawlerVNEXPRESS
             foreach (var tagLink in tagLinkArticles)
             {
                 News news = new News { };
-                var link = tagLink.Attributes["href"].Value;
+                //var link = tagLink.Attributes["href"].Value;
 
                 //Link podcast để test
                 //var link = "https://vnexpress.net/le-nham-chuc-khac-thuong-cua-tong-thong-my-4222161.html";
+
+                //Link normal để test
+                var link ="https://vnexpress.net/thiet-hai-940-ty-dong-tai-sadeco-da-duoc-khac-phuc-4220098.html";
 
                 //Link slide để test
                 //var link = "https://vnexpress.net/tuan-tra-trong-dem-am-2-do-c-4220047.html";
@@ -76,22 +79,22 @@ namespace CrawlerVNEXPRESS
             }
 
             //lấy nội dung từ  database để kiểm tra
-            using (var context = new ClawlerContext())
-            {
-                //Muốn lấy Content từ News thì phải dùng Include trong using Microsoft.EntityFrameworkCore;
-                var testNews = context.Newss.Include(n => n.ImageLink);
-                foreach (var news1 in testNews)
-                {
-                    //Console.WriteLine(TiengVietKhongDau(news1.Category.Text));
-                    Console.WriteLine(news1.Link);
-                    foreach(var imageLink in news1.ImageLink){
-                       Console.WriteLine(imageLink?.TextLink);
-                       Console.WriteLine(TiengVietKhongDau(imageLink?.Captain ??""));
-                    }
+            // using (var context = new ClawlerContext())
+            // {
+            //     //Muốn lấy Content từ News thì phải dùng Include trong using Microsoft.EntityFrameworkCore;
+            //     var testNews = context.Newss.Include(n => n.ImageLink);
+            //     foreach (var news1 in testNews)
+            //     {
+            //         //Console.WriteLine(TiengVietKhongDau(news1.Category.Text));
+            //         Console.WriteLine(news1.Link);
+            //         foreach(var imageLink in news1.ImageLink){
+            //            Console.WriteLine(imageLink?.TextLink);
+            //            Console.WriteLine(TiengVietKhongDau(imageLink?.Captain ??""));
+            //         }
                     
                     
-                }
-            }
+            //     }
+            // }
         }
 
 
@@ -136,13 +139,16 @@ namespace CrawlerVNEXPRESS
 
             ///meta[@itemprop='url']"
             var allNodes = doc.SelectNodes("//p[contains(@class,'Normal') or contains(@class,'description')]|//figure");
-            var node = allNodes[0];
             //Đếm tất cả nội dung và hình ảnh.
+           
             var countAllNotes = allNodes.Count();
             ICollection<ImageLink> linkImages = new List<ImageLink>();
             ICollection<Content> contents = new List<Content>();
             for (int i = 0; i < countAllNotes; i++)
             {
+                //Hiện node hình ảnh để test trên linux:
+                Console.WriteLine(TiengVietKhongDau(allNodes[i].InnerHtml) );
+
                 //Lấy Image
                 //nếu là Image thì thẻ có tên là figure
                 var NameNode = allNodes[i].Name;
