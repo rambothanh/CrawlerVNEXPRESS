@@ -43,6 +43,8 @@ namespace CrawlerVNEXPRESS
                 //Link normal để test vào ngay 30/11/2023
                 //link ="https://vnexpress.net/chuyen-gia-ban-ve-xu-huong-tri-tue-nhan-tao-tai-ai4vn-2023-4655032.html";
                 //link ="https://vnexpress.net/9-quan-huyen-tp-hcm-bi-cat-nuoc-nuoc-yeu-4678376.html";
+                //link= "https://vnexpress.net/loat-oto-ra-mat-khach-viet-thang-11-4682907.html";
+                //link="https://vnexpress.net/viet-nam-tham-gia-thu-nghiem-vaccine-lao-moi-4683013.html";
 
                 //Link slide để test
                 //var link = "https://vnexpress.net/tuan-tra-trong-dem-am-2-do-c-4220047.html";
@@ -100,7 +102,7 @@ namespace CrawlerVNEXPRESS
             //     foreach (var news1 in testNews)
             //     {
             //         //Console.WriteLine(TiengVietKhongDau(news1.Category.Text));
-            //         Console.WriteLine(news1.Link);
+            //         //Console.WriteLine(news1.Link);
             //         foreach(var imageLink in news1.ImageLink){
             //            Console.WriteLine("Link Anh: "+imageLink?.TextLink);
             //            Console.WriteLine(TiengVietKhongDau("Captain Anh: "+ imageLink?.Captain ??""));
@@ -150,6 +152,7 @@ namespace CrawlerVNEXPRESS
         {
 
             ///meta[@itemprop='url']"
+
             var allNodes = doc.SelectNodes("//p[contains(@class,'Normal') or contains(@class,'description')]|//figure");
             //Đếm tất cả nội dung và hình ảnh.
            
@@ -187,7 +190,7 @@ namespace CrawlerVNEXPRESS
                     // Lấy Link ảnh Cách 1:
                     var link_anh_ben_ngoai = allNodes[i].SelectNodes("div/picture/img") 
                             ?.FirstOrDefault()
-                            .Attributes["data-src"].Value;
+                            ?.Attributes["data-src"].Value;
                     
                     // Lấy Link ảnh Cách 2:
                     if(string.IsNullOrEmpty(link_anh_ben_ngoai))
@@ -196,7 +199,7 @@ namespace CrawlerVNEXPRESS
                         // /div[contains(@class,'fig-picture')]
                         link_anh_ben_ngoai = allNodes[i].SelectNodes("div[contains(@class,'fig-picture')]") 
                                                     ?.FirstOrDefault()
-                                                    .Attributes["src"].Value;
+                                                    ?.Attributes["src"].Value;
                     }
 
                     // Console.WriteLine("Test link anh: "+ link_anh_ben_ngoai);
