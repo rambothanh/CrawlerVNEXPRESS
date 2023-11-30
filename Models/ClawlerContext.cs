@@ -17,7 +17,7 @@ namespace CrawlerVNEXPRESS.Models
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder){
         //UseInMemoryDatabase
         //optionsBuilder.UseInMemoryDatabase("Newss");
-        optionsBuilder.UseSqlite(@"Data Source=/var/www/todoapi.sofsog.com/html/todoapi/TodoApi/DataVnexpress.db");
+        optionsBuilder.UseSqlite(@"Data Source="+Environment.GetEnvironmentVariable("LINK_CUA_DATA_VNEXPRESS"));
         //optionsBuilder.UseSqlite(@"Data Source=DataVnexpress.db");
         //optionsBuilder.UseSqlServer(@"Server=.\SQLEXPRESS;Database=TenDataBase;Trusted_Connection=True;");
         

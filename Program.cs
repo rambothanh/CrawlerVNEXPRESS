@@ -16,6 +16,11 @@ namespace CrawlerVNEXPRESS
     {
         private static void Main(string[] args)
         {
+            //Test biến môi trường --> Tested ok
+            // Console.WriteLine("SQlite="+@"Data Source="+Environment.GetEnvironmentVariable("LINK_CUA_DATA_VNEXPRESS"));
+            // Environment.Exit(0);
+
+
             //Lấy Các đường link tin tức trong trang chủ vnexpress:
             HtmlWeb htmlWeb = new HtmlWeb();
             HtmlDocument document = htmlWeb.Load("https://vnexpress.net/");
