@@ -41,6 +41,7 @@ namespace CrawlerVNEXPRESS
 
                 //Link slide để test
                 //var link = "https://vnexpress.net/tuan-tra-trong-dem-am-2-do-c-4220047.html";
+                //https://vnexpress.net/nghe-si-tong-duyet-gala-ngoi-sao-cua-nam-4223351.html
 
                 //Bỏ qua link đã lấy    
                 if (CheckLinkInDataBase(link))
