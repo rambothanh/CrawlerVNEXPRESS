@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace CrawlerVNEXPRESS
 {
@@ -26,13 +27,17 @@ namespace CrawlerVNEXPRESS
             foreach (var tagLink in tagLinkArticles)
             {
                 News news = new News { };
-                //var link = tagLink.Attributes["href"].Value;
+                var link = tagLink.Attributes["href"].Value;
 
                 //Link podcast để test
                 //var link = "https://vnexpress.net/le-nham-chuc-khac-thuong-cua-tong-thong-my-4222161.html";
 
-                //Link normal để test
-                var link ="https://vnexpress.net/thiet-hai-940-ty-dong-tai-sadeco-da-duoc-khac-phuc-4220098.html";
+                //Link normal để test cũ trước ngày 30/11/2023
+                //link ="https://vnexpress.net/nam-sinh-lao-cai-dat-diem-tuyet-doi-nghe-noi-ielts-4451248.html";
+                
+                //Link normal để test vào ngay 30/11/2023
+                //link ="https://vnexpress.net/chuyen-gia-ban-ve-xu-huong-tri-tue-nhan-tao-tai-ai4vn-2023-4655032.html";
+                //link ="https://vnexpress.net/9-quan-huyen-tp-hcm-bi-cat-nuoc-nuoc-yeu-4678376.html";
 
                 //Link slide để test
                 //var link = "https://vnexpress.net/tuan-tra-trong-dem-am-2-do-c-4220047.html";
@@ -50,6 +55,9 @@ namespace CrawlerVNEXPRESS
 
                 //Load link để được đối tượng HtmlDocument
                 HtmlDocument htmlDocArticle = htmlWeb.Load(link);
+                // Dừng chương trình trong 3 giây
+                Thread.Sleep(3000);
+                
                 //Lấy đối tượng htmlNode
                 var doc = htmlDocArticle.DocumentNode;
 
@@ -78,24 +86,22 @@ namespace CrawlerVNEXPRESS
 
             }
 
-            //lấy nội dung từ  database để kiểm tra
-            using (var context = new ClawlerContext())
-            {
-                //Muốn lấy Content từ News thì phải dùng Include trong using Microsoft.EntityFrameworkCore;
-                var testNews = context.Newss.Include(n => n.ImageLink);
-                foreach (var news1 in testNews)
-                {
-                    //Console.WriteLine(TiengVietKhongDau(news1.Category.Text));
-                    Console.WriteLine(news1.Link);
-                    foreach(var imageLink in news1.ImageLink){
-                       Console.WriteLine(imageLink?.TextLink);
-                       Console.WriteLine(TiengVietKhongDau(imageLink?.Captain ??""));
-                    }
-                    
-                    
-                }
-            }
-        }
+            // =========== lấy nội dung từ  database để kiểm tra
+            // using (var context = new ClawlerContext())
+            // {
+            //     //Muốn lấy Content từ News thì phải dùng Include trong using Microsoft.EntityFrameworkCore;
+            //     var testNews = context.Newss.Include(n => n.ImageLink);
+            //     foreach (var news1 in testNews)
+            //     {
+            //         //Console.WriteLine(TiengVietKhongDau(news1.Category.Text));
+            //         Console.WriteLine(news1.Link);
+            //         foreach(var imageLink in news1.ImageLink){
+            //            Console.WriteLine("Link Anh: "+imageLink?.TextLink);
+            //            Console.WriteLine(TiengVietKhongDau("Captain Anh: "+ imageLink?.Captain ??""));
+            //         }
+            //     }
+            // }
+        } // ============= Kết thúc chương trình
 
 
         //Check type of news return live slide_show podcast normal
@@ -120,7 +126,7 @@ namespace CrawlerVNEXPRESS
 
             return "normal";
 
-        }
+        } // End CheckType
 
         private static void AddImageAndContent(HtmlNode doc, ref News news)
         {
@@ -144,14 +150,17 @@ namespace CrawlerVNEXPRESS
             var countAllNotes = allNodes.Count();
             ICollection<ImageLink> linkImages = new List<ImageLink>();
             ICollection<Content> contents = new List<Content>();
-            for (int i = 0; i < countAllNotes; i++)
+            
+            for (int i = 0; i < countAllNotes; i++) // Dò từng node
             {
-                //Hiện node hình ảnh để test trên linux:
+                //Hiện node hình ảnh để test trên linux: (un comment chỗ này để test)
                 //Console.WriteLine(TiengVietKhongDau(allNodes[i].InnerHtml) );
 
                 //Lấy Image
-                //nếu là Image thì thẻ có tên là figure
+                //nếu là Image thì thẻ có tên là picture
                 var NameNode = allNodes[i].Name;
+                 // 30/11/2023 vnexpress đã dùng thêm node tên picture để lưu ảnh
+
                 if (NameNode == "figure" && !string.IsNullOrEmpty(NameNode))
                 {
                     //Lấy caption của image
@@ -169,18 +178,68 @@ namespace CrawlerVNEXPRESS
                     //         .Attributes["content"].Value
                     // });
 
+                    // Lấy Link ảnh Cách 1:
+                    var link_anh_ben_ngoai = allNodes[i].SelectNodes("div/picture/img") 
+                            ?.FirstOrDefault()
+                            .Attributes["data-src"].Value;
+                    
+                    // Lấy Link ảnh Cách 2:
+                    if(string.IsNullOrEmpty(link_anh_ben_ngoai))
+                    {
+                       // Console.WriteLine("Vao duoc link anh cach 2:"+ link_anh_ben_ngoai);
+                        // /div[contains(@class,'fig-picture')]
+                        link_anh_ben_ngoai = allNodes[i].SelectNodes("div[contains(@class,'fig-picture')]") 
+                                                    ?.FirstOrDefault()
+                                                    .Attributes["src"].Value;
+                    }
+
+                    // Console.WriteLine("Test link anh: "+ link_anh_ben_ngoai);
+
+
                     //Lấy link và thêm vào danh sách linkImages, trên linux:
                     linkImages.Add(new ImageLink
                     {
                         Captain = captain,
                         Location = i + 1,
                         //Nhở bỏ hai dấu // (để tìm kiếm con trực tiếp)
-                        TextLink = allNodes[i].SelectNodes("div/img")
-                            ?.FirstOrDefault()
-                            .Attributes["src"].Value
+                        // 30/11/23: //figure/div/picture/img
+                        TextLink = link_anh_ben_ngoai
                     });
 
-                }
+                } // End Lưu link ảnh
+                
+                
+                // 30/11/2023 vnexpress đã dùng thêm node khác vẫn giữ lại đề phòng
+                // if (NameNode == "figure" && !string.IsNullOrEmpty(NameNode))
+                // {
+                //     //Lấy caption của image
+                //     //figure/figcaption/p
+                //     //Nhở bỏ hai dấu // (để tìm kiếm con trực tiếp)
+                //     var captain = allNodes[i].SelectNodes("figcaption/p")?.FirstOrDefault().InnerText;
+                //     // //Lấy link và thêm vào danh sách linkImages, trên windown:
+                //     // linkImages.Add(new ImageLink
+                //     // {
+                //     //     Captain = captain,
+                //     //     Location = i + 1,
+                //     //     //Nhở bỏ hai dấu // (để tìm kiếm con trực tiếp)
+                //     //     TextLink = allNodes[i].SelectNodes("meta[@itemprop='url']")
+                //     //         ?.FirstOrDefault()
+                //     //         .Attributes["content"].Value
+                //     // });
+
+                //     //Lấy link và thêm vào danh sách linkImages, trên linux:
+                //     linkImages.Add(new ImageLink
+                //     {
+                //         Captain = captain,
+                //         Location = i + 1,
+                //         //Nhở bỏ hai dấu // (để tìm kiếm con trực tiếp)
+                //         TextLink = allNodes[i].SelectNodes("div/img")
+                //             ?.FirstOrDefault()
+                //             .Attributes["src"].Value
+                //     });
+
+                // } // End Lưu link ảnh
+
                 //Lấy nội dung (bao gồm description và subtitle)
                 //Có thời gian sẽ tách ra
                 if (NameNode == "p" && !string.IsNullOrEmpty(NameNode))
@@ -220,6 +279,7 @@ namespace CrawlerVNEXPRESS
                     linkImages.Add(new ImageLink { Location = i + 1, TextLink = allNodes[i].Attributes["data-src"].Value });
                 }
                 //Lấy nội dung (bao gồm description và subtitle)
+               
                 //Có thời gian sẽ tách ra
                 if (NameNode == "p" && !string.IsNullOrEmpty(NameNode))
                 {
