@@ -96,18 +96,10 @@ namespace CrawlerVNEXPRESS
                 
                 //Load link để được đối tượng HtmlDocument
                 
-               try
-                {
-                    // Thực hiện yêu cầu mạng
-                    HtmlDocument htmlDocArticle = htmlWeb.Load(link);
-                }
-                catch (WebException ex)
-                {
-                    // Xử lý ngoại lệ WebException
-                    Console.WriteLine("Yêu cầu mạng đã vượt quá thời gian chờ.");
-                    Console.WriteLine(ex.Message);
-                }
-                
+               
+                // Thực hiện yêu cầu mạng
+                HtmlDocument htmlDocArticle = htmlWeb.Load(link);
+            
                 //Lấy đối tượng htmlNode
                 var doc = htmlDocArticle.DocumentNode;
 
@@ -116,14 +108,14 @@ namespace CrawlerVNEXPRESS
                 
                 var type = CheckType(doc);
                 
-                Console.WriteLine("type: "+  type);
+                //Console.WriteLine("type: "+  type);
 
                 if (type == "live" || type == "podcast")
                 {
                     continue; // Tiêp tục vòng lập, bỏ qua link này
                 }
                  
-                Console.WriteLine("Các cần add: "+link);
+                Console.WriteLine("Link cần thêm: "+link);
                 //Thêm link vào news
                 news.Link = link;
                 // Thêm ngày đăng tin vào news
@@ -154,6 +146,7 @@ namespace CrawlerVNEXPRESS
             //         }
             //     }
             // }
+            Console.WriteLine("Vừa chạy chương trình thành công");
         } // ============= Kết thúc chương trình
 
 
@@ -188,7 +181,9 @@ namespace CrawlerVNEXPRESS
                 "|//div[@class=\"breadcrumb\"]/a[2]");
             if (catNodes?.InnerText == "Podcast")
                 return "podcast";
-            Console.WriteLine("Các link normal: ");
+            
+            //Console.WriteLine("Các link normal: ");
+            
             return "normal";
 
         } // End CheckType
@@ -416,7 +411,8 @@ namespace CrawlerVNEXPRESS
 
                 context.Newss.Add(news);
                 context.SaveChanges();
-                Console.WriteLine("Add thanh công:"+ news.Title);
+                
+                Console.WriteLine("Thêm thành công tin: "+ news.Title);
             }
         }
 
