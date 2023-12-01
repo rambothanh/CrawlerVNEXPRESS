@@ -9,6 +9,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Threading;
+using System.IO;
 
 namespace CrawlerVNEXPRESS
 {
@@ -16,10 +17,30 @@ namespace CrawlerVNEXPRESS
     {
         private static void Main(string[] args)
         {
-            //Test biến môi trường --> Tested ok
-            // Console.WriteLine("SQlite="+@"Data Source="+Environment.GetEnvironmentVariable("LINK_CUA_DATA_VNEXPRESS"));
-            // Environment.Exit(0);
+            
 
+            // ==== Test biến môi trường và Data --> Tested ok
+            // Console.WriteLine("SQlite="+@"Data Source="+Environment.GetEnvironmentVariable("LINK_CUA_DATA_VNEXPRESS"));
+            // =========== lấy nội dung từ  database để kiểm tra
+            // using (var context = new ClawlerContext())
+            // {
+            //     //Muốn lấy Content từ News thì phải dùng Include trong using Microsoft.EntityFrameworkCore;
+            //     var testNews = context.Newss
+            //                             .OrderByDescending(n => n.Id) // Sắp xếp giảm dần
+            //                             .Take(10) // lấy 10 tin gần nhất
+            //                             .Include(n => n.ImageLink); // Bao gồm các đường link ảnh đi theo
+            //     foreach (var news1 in testNews)
+            //     {
+            //         //Console.WriteLine(TiengVietKhongDau(news1.Category.Text));
+            //         Console.WriteLine(news1.Link);
+            //         foreach(var imageLink in news1.ImageLink){
+            //            Console.WriteLine("Link Anh: "+imageLink?.TextLink);
+            //            Console.WriteLine(TiengVietKhongDau("Captain Anh: "+ imageLink?.Captain ??""));
+            //         }
+            //     }
+            // }
+            // Environment.Exit(0);
+            // ==== End Test biến môi trường và Data --> Tested ok
 
             //Lấy Các đường link tin tức trong trang chủ vnexpress:
             HtmlWeb htmlWeb = new HtmlWeb();
@@ -27,6 +48,16 @@ namespace CrawlerVNEXPRESS
             var tagLinkArticles = document
                             .DocumentNode
                             .QuerySelectorAll("article.item-news>h3.title-news>a").ToList();
+            
+            // // ==== Test các đường link
+            // foreach (var tagLink in tagLinkArticles)
+            // {
+            //     Console.WriteLine("Link:"+tagLink.Attributes["href"].Value);
+                            
+            // }
+            // Environment.Exit(0);
+            // // ==== end Test các đường link
+
             //Duyệt qua các đường link vừa lấy được, lấy nội dung, kiểm tra
             //và lưu vào database
             foreach (var tagLink in tagLinkArticles)
@@ -61,22 +92,38 @@ namespace CrawlerVNEXPRESS
                     continue; // Tiêp tục vòng lập, bỏ qua link này
                 }
 
+               // Console.WriteLine("Các Link chưa Add: "+link);
+                
                 //Load link để được đối tượng HtmlDocument
-                HtmlDocument htmlDocArticle = htmlWeb.Load(link);
-                // Dừng chương trình trong 3 giây
-                Thread.Sleep(3000);
+                
+               try
+                {
+                    // Thực hiện yêu cầu mạng
+                    HtmlDocument htmlDocArticle = htmlWeb.Load(link);
+                }
+                catch (WebException ex)
+                {
+                    // Xử lý ngoại lệ WebException
+                    Console.WriteLine("Yêu cầu mạng đã vượt quá thời gian chờ.");
+                    Console.WriteLine(ex.Message);
+                }
                 
                 //Lấy đối tượng htmlNode
                 var doc = htmlDocArticle.DocumentNode;
 
                 //Bỏ qua link trực tiếp, và link podcast
                 //Check type of news return: live, slide_show, podcast, normal
+                
                 var type = CheckType(doc);
+                
+                Console.WriteLine("type: "+  type);
+
                 if (type == "live" || type == "podcast")
                 {
                     continue; // Tiêp tục vòng lập, bỏ qua link này
                 }
-
+                 
+                Console.WriteLine("Các cần add: "+link);
                 //Thêm link vào news
                 news.Link = link;
                 // Thêm ngày đăng tin vào news
@@ -89,8 +136,6 @@ namespace CrawlerVNEXPRESS
                 AddImageAndContent(doc, ref news);
                 // Kiểm tra Cat và add news vào database
                 CheckCatAndAddNews(news);
-
-
 
             }
 
@@ -115,8 +160,20 @@ namespace CrawlerVNEXPRESS
         //Check type of news return live slide_show podcast normal
         private static string CheckType(HtmlNode doc)
         {
+            // ======== TEST
+            // string htmlContent = TiengVietKhongDau(doc.InnerHtml) ;
+            // string filePath = "doc.html"; // Đường dẫn tới tệp HTML đích
+            
+            // // Console.WriteLine(TiengVietKhongDau(doc.InnerHtml) );
+            // // Ghi nội dung HTML vào tệp văn bản
+            // using (StreamWriter writer = new StreamWriter(filePath))
+            // {
+            //     writer.Write(htmlContent);
+            // }
+            // Environment.Exit(0);
+            // ======== END TEST
             //Nếu tồn tại //i[contains(@class, ic-live)] là bài viết trực tiếp
-            var linkLive = doc.SelectNodes("//i[contains(@class, ic-live)]");
+            var linkLive = doc.SelectNodes("//i[contains(@class, 'ic-live')]");
             if (linkLive != null)
                 return "live";
 
@@ -131,7 +188,7 @@ namespace CrawlerVNEXPRESS
                 "|//div[@class=\"breadcrumb\"]/a[2]");
             if (catNodes?.InnerText == "Podcast")
                 return "podcast";
-
+            Console.WriteLine("Các link normal: ");
             return "normal";
 
         } // End CheckType
@@ -197,7 +254,7 @@ namespace CrawlerVNEXPRESS
                     {
                        // Console.WriteLine("Vao duoc link anh cach 2:"+ link_anh_ben_ngoai);
                         // /div[contains(@class,'fig-picture')]
-                        link_anh_ben_ngoai = allNodes[i].SelectNodes("div[contains(@class,'fig-picture')]") 
+                        link_anh_ben_ngoai = allNodes[i].SelectNodes("div[contains(@class,'fig-picture')]/img") 
                                                     ?.FirstOrDefault()
                                                     ?.Attributes["src"].Value;
                     }
@@ -359,16 +416,20 @@ namespace CrawlerVNEXPRESS
 
                 context.Newss.Add(news);
                 context.SaveChanges();
+                Console.WriteLine("Add thanh công:"+ news.Title);
             }
         }
 
         // Kiểm tra link VNexpress đã được lưu ở database chưa.
         private static bool CheckLinkInDataBase(string linkPara)
         {
-            // lấy nội dung từ  database:
+            // lấy nội dung từ  database, kiểm tra linkPara trả vể true nếu đã tồn tại
             using (var context = new ClawlerContext())
             {
-                return context.Newss.Any(n => n.Link == linkPara);
+                return context.Newss
+                             .OrderByDescending(n => n.Id) // Sắp xếp giảm dần                           
+                             .Take(1000)
+                             .Any(n => n.Link == linkPara);
             }
         }
 
